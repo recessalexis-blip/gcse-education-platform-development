@@ -99,6 +99,32 @@ const statements = [
     "completedAt" timestamp NOT NULL DEFAULT now()
   )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "paper_progress_user_paper" ON "paper_progress" ("userId", "paperKey")`,
+  `CREATE TABLE IF NOT EXISTS "exam_attempts" (
+    "id" serial PRIMARY KEY,
+    "userId" text NOT NULL,
+    "kind" text NOT NULL,
+    "subject" text NOT NULL,
+    "paperId" text,
+    "label" text NOT NULL,
+    "totalMarks" integer NOT NULL,
+    "awardedMarks" integer NOT NULL,
+    "grade" text,
+    "durationSec" integer NOT NULL DEFAULT 0,
+    "createdAt" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "exam_attempts_user" ON "exam_attempts" ("userId", "createdAt")`,
+  `CREATE TABLE IF NOT EXISTS "review_questions" (
+    "id" serial PRIMARY KEY,
+    "userId" text NOT NULL,
+    "questionId" text NOT NULL,
+    "subject" text NOT NULL,
+    "topic" text NOT NULL,
+    "timesWrong" integer NOT NULL DEFAULT 1,
+    "lastWrongAt" timestamp NOT NULL DEFAULT now(),
+    "resolvedAt" timestamp
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "review_questions_user_question" ON "review_questions" ("userId", "questionId")`,
+  `CREATE INDEX IF NOT EXISTS "question_attempts_question" ON "question_attempts" ("questionId")`,
 ]
 
 for (const sql of statements) {

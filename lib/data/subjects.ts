@@ -1,4 +1,4 @@
-export type SubjectId = 'maths' | 'physics' | 'chemistry'
+export type SubjectId = 'maths' | 'physics' | 'chemistry' | 'biology' | 'history' | 'geography'
 
 export interface SubjectMeta {
   id: SubjectId
@@ -60,6 +60,30 @@ export const SUBJECTS: Record<SubjectId, SubjectMeta> = {
       'Inorganic & Analysis',
     ],
   },
+  biology: {
+    id: 'biology',
+    name: 'Biology',
+    code: '4BI1',
+    tagline: 'Content coming soon',
+    colorVar: 'var(--biology)',
+    topics: [],
+  },
+  history: {
+    id: 'history',
+    name: 'History',
+    code: '4HI1',
+    tagline: 'Content coming soon',
+    colorVar: 'var(--history)',
+    topics: [],
+  },
+  geography: {
+    id: 'geography',
+    name: 'Geography',
+    code: '4GE1',
+    tagline: 'Content coming soon',
+    colorVar: 'var(--geography)',
+    topics: [],
+  },
 }
 
 export const SUBJECT_IDS = Object.keys(SUBJECTS) as SubjectId[]
@@ -68,20 +92,50 @@ export function isSubjectId(value: string): value is SubjectId {
   return value in SUBJECTS
 }
 
-export interface Question {
+/**
+ * One creditable point in a mark scheme.
+ * `accept` lists alternative phrasings; a phrase may join required keywords with "+"
+ * (e.g. "particles+move"). The point is awarded when the student's text contains any alternative.
+ * M points are method marks and are credited from working even when the final answer is wrong.
+ */
+export interface MarkPoint {
+  kind?: 'M' | 'A' | 'B' | 'C'
+  marks: number
+  text: string
+  accept?: string[]
+}
+
+export interface AnswerSpec {
+  type: 'mcq' | 'numeric' | 'short' | 'written'
+  marks: number
+  prompt: string
+  options?: string[]
+  /** mcq: index of the correct option. numeric: the number. short: accepted answers (lowercase). */
+  answer?: number | string[]
+  tolerance?: number
+  unit?: string
+  markScheme?: MarkPoint[]
+  explanation?: string
+}
+
+export interface QuestionPart extends AnswerSpec {
+  /** Label shown to the student, e.g. "(a)" or "(b)(ii)". */
+  label: string
+}
+
+export interface Question extends AnswerSpec {
   id: string
   subject: SubjectId
   topic: string
   difficulty: 1 | 2 | 3
+  /** Total marks. For multi-part questions this is the sum of the parts. */
   marks: number
-  type: 'mcq' | 'numeric' | 'short'
-  prompt: string
-  options?: string[]
-  /** mcq: index of the correct option. numeric: the number. short: accepted answers (lowercase). */
-  answer: number | string[]
-  tolerance?: number
-  unit?: string
+  /** For multi-part questions `prompt` is the stem and the parts are answered separately. */
+  parts?: QuestionPart[]
   explanation: string
+  /** Set on questions transcribed from an official past paper. */
+  paperId?: string
+  number?: string
 }
 
 export interface Flashcard {

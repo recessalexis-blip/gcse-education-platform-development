@@ -124,3 +124,32 @@ export const paperProgress = pgTable(
   },
   (t) => [uniqueIndex('paper_progress_user_paper').on(t.userId, t.paperKey)],
 )
+
+export const examAttempts = pgTable('exam_attempts', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  kind: text('kind').notNull(),
+  subject: text('subject').notNull(),
+  paperId: text('paperId'),
+  label: text('label').notNull(),
+  totalMarks: integer('totalMarks').notNull(),
+  awardedMarks: integer('awardedMarks').notNull(),
+  grade: text('grade'),
+  durationSec: integer('durationSec').notNull().default(0),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
+export const reviewQuestions = pgTable(
+  'review_questions',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('userId').notNull(),
+    questionId: text('questionId').notNull(),
+    subject: text('subject').notNull(),
+    topic: text('topic').notNull(),
+    timesWrong: integer('timesWrong').notNull().default(1),
+    lastWrongAt: timestamp('lastWrongAt').notNull().defaultNow(),
+    resolvedAt: timestamp('resolvedAt'),
+  },
+  (t) => [uniqueIndex('review_questions_user_question').on(t.userId, t.questionId)],
+)
