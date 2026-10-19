@@ -115,6 +115,8 @@ export interface AnswerSpec {
   tolerance?: number
   unit?: string
   markScheme?: MarkPoint[]
+  /** Official mark scheme text transcribed from the paper's mark scheme. */
+  schemeText?: string
   explanation?: string
 }
 
@@ -136,6 +138,8 @@ export interface Question extends AnswerSpec {
   /** Set on questions transcribed from an official past paper. */
   paperId?: string
   number?: string
+  /** Public paths of diagrams cropped from the question paper. */
+  figures?: string[]
 }
 
 export interface Flashcard {

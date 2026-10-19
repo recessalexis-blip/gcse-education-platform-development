@@ -591,8 +591,6 @@ def import_paper(p):
 
 
 def main():
-    import faulthandler
-    faulthandler.dump_traceback_later(500, exit=True)
     args = sys.argv[1:]
     papers = json.load(open(os.path.join(ROOT, 'lib/data/papers.json')))
     if '--subject' in args:
@@ -610,19 +608,29 @@ def main():
         except Exception as e:  # keep going; the failure is reported
             return {'paper': p['id'], 'questions': [], 'rejected': [{'question': p['id'], 'problems': [f'paper failed: {e!r}']}], 'questionCount': 0}
 
-    with ThreadPoolExecutor(6) as ex:
-        results = list(ex.map(run, papers))
     out_q = os.path.join(ROOT, 'lib/data/paper-questions.json')
-    existing = []
-    if os.path.exists(out_q) and ('--subject' in args or '--paper' in args or '--limit' in args):
-        existing = [q for q in json.load(open(out_q)) if q['paperId'] not in {r['paper'] for r in results}]
-    allq = existing + [q for r in results for q in r['questions']]
-    json.dump(allq, open(out_q, 'w'), ensure_ascii=False, separators=(',', ':'))
-    report = [{'paper': r['paper'], 'found': r['questionCount'], 'imported': len(r['questions']), 'rejected': r['rejected']} for r in results]
-    json.dump(report, open(os.path.join(ROOT, 'lib/data/import-report.json'), 'w'), indent=1, ensure_ascii=False)
-    tot_found = sum(r['questionCount'] for r in results)
-    tot_ok = sum(len(r['questions']) for r in results)
-    print(f'papers {len(results)}  questions found {tot_found}  imported {tot_ok}')
+    out_r = os.path.join(ROOT, 'lib/data/import-report.json')
+    allq = json.load(open(out_q)) if os.path.exists(out_q) else []
+    report = json.load(open(out_r)) if os.path.exists(out_r) else []
+    done = {r['paper'] for r in report}
+    if '--force' in args:
+        done = set()
+    papers = [p for p in papers if p['id'] not in done]
+    print('to import', len(papers), flush=True)
+
+    def save():
+        json.dump(allq, open(out_q + '.tmp', 'w'), ensure_ascii=False, separators=(',', ':'))
+        os.replace(out_q + '.tmp', out_q)
+        json.dump(report, open(out_r + '.tmp', 'w'), indent=1, ensure_ascii=False)
+        os.replace(out_r + '.tmp', out_r)
+
+    with ThreadPoolExecutor(6) as ex:
+        for r in ex.map(run, papers):
+            allq[:] = [q for q in allq if q['paperId'] != r['paper']] + r['questions']
+            report[:] = [x for x in report if x['paper'] != r['paper']] + [{'paper': r['paper'], 'found': r['questionCount'], 'imported': len(r['questions']), 'rejected': r['rejected']}]
+            save()
+            print('done', r['paper'], r['questionCount'], len(r['questions']), flush=True)
+    print(f'papers {len(report)}  questions found {sum(x["found"] for x in report)}  imported {sum(x["imported"] for x in report)}')
 
 
 if __name__ == '__main__':

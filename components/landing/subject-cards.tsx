@@ -1,11 +1,18 @@
 'use client'
 
-import { ArrowUpRight, Atom, FlaskConical, Sigma } from 'lucide-react'
+import { ArrowUpRight, Atom, Dna, FlaskConical, Globe, Landmark, Sigma } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { SUBJECT_IDS, SUBJECTS, type SubjectId } from '@/lib/data/subjects'
 
-const ICONS = { maths: Sigma, physics: Atom, chemistry: FlaskConical } as const
+const ICONS = {
+  maths: Sigma,
+  physics: Atom,
+  chemistry: FlaskConical,
+  biology: Dna,
+  history: Landmark,
+  geography: Globe,
+} as const
 
 export function SubjectCards({
   counts,

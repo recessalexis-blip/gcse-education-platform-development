@@ -125,6 +125,9 @@ const statements = [
   )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "review_questions_user_question" ON "review_questions" ("userId", "questionId")`,
   `CREATE INDEX IF NOT EXISTS "question_attempts_question" ON "question_attempts" ("questionId")`,
+  `ALTER TABLE "question_attempts" ADD COLUMN IF NOT EXISTS "marksAwarded" integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE "question_attempts" ADD COLUMN IF NOT EXISTS "marksMax" integer NOT NULL DEFAULT 1`,
+  `ALTER TABLE "question_attempts" ADD COLUMN IF NOT EXISTS "flagged" boolean NOT NULL DEFAULT false`,
 ]
 
 for (const sql of statements) {
